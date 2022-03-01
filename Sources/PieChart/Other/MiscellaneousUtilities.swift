@@ -89,3 +89,32 @@ extension NumberFormatter {
     }()
 
 }
+
+extension NSEvent.EventType: CustomStringConvertible {
+    
+    public var description: String {
+        switch self {
+            case .leftMouseDown:
+                return "leftMouseDown"
+            case .leftMouseUp:
+                return "leftMouseUp"
+            case .rightMouseDown:
+                return "rightMouseDown"
+            case .rightMouseUp:
+                return "rightMouseUp"
+            case .mouseMoved:
+                return "mouseMoved"
+            case .leftMouseDragged:
+                return "leftMouseDragged"
+            case .rightMouseDragged:
+                return "rightMouseDragged"
+            case .mouseEntered:
+                return "mouseEntered"
+            case .mouseExited:
+                return "mouseExited"
+            default:
+                return "other"
+        }
+    }
+
+}

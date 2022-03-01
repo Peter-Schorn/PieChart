@@ -17,6 +17,12 @@ struct PieSliceView: View {
 
     let index: Int
 
+    init(
+        index: Int
+    ) {
+        self.index = index
+    }
+
     var slice: PieSliceConfiguration {
         self.configuration.slices[index]
     }
@@ -28,10 +34,8 @@ struct PieSliceView: View {
         self.configuration.centralAngles[index]
     }
 
-    init(
-        index: Int
-    ) {
-        self.index = index
+    var outerDiameterScale: CGFloat {
+        self.isHighlighted ? 1 : self.configuration.outerDiameterScale
     }
 
     var body: some View {
@@ -44,10 +48,10 @@ struct PieSliceView: View {
                     innerRadius: configuration.scaledInnerRadius
                 )
                 .scaleOuterDiameter(
-                    by: isHighlighted ? 1 : configuration.scaleMultiplier
+                    by: outerDiameterScale
                 )
                 .observePath { path in
-                    
+
                     var paths = self.configuration.paths
                     paths[slice.id] = path
 
@@ -56,7 +60,7 @@ struct PieSliceView: View {
                     // value.
                     if paths != self.configuration.paths {
                         self.configuration.paths = paths
-                        
+
                         // even if the mouse hasn't moved, the path may have,
                         // which might change which path the mouse is inside of
                         self.configuration.updateHighlighedSlice()
@@ -69,9 +73,7 @@ struct PieSliceView: View {
                 }
 
                 slice.label
-                    .modifier(
-                        radialOffset(geometry)
-                    )
+                    .modifier(radialOffset(geometry))
                 
             }
         }
@@ -100,22 +102,15 @@ struct PieSliceView: View {
         let frame = geometry.frame(in: .local)
             
         // the frame is always square
-        var length = frame.width
-
-        if !isHighlighted {
-            length *= self.configuration.scaleMultiplier
-        }
+        let length = frame.width * self.configuration.outerDiameterScale
 
         let endAngle = self.startAngle + self.centralAngle
         let middleAngle = (endAngle + self.startAngle) / 2
         
         let outerRadius = length / 2
         
-        var innerRadius = outerRadius * self.configuration.scaledInnerRadius
-        
-        if !isHighlighted {
-            innerRadius /= self.configuration.scaleMultiplier
-        }
+        let innerRadius = (outerRadius * self.configuration.scaledInnerRadius) /
+                self.configuration.outerDiameterScale
         
         let middleRadius = (innerRadius + outerRadius) / 2
         
@@ -126,4 +121,17 @@ struct PieSliceView: View {
 
     }
     
+}
+
+struct RadiusSectorPathPreferenceKey: PreferenceKey {
+    
+    static let defaultValue: [PieSliceConfiguration.ID: Path] = [:]
+
+    static func reduce(
+        value: inout [PieSliceConfiguration.ID: Path],
+        nextValue: () -> [PieSliceConfiguration.ID : Path]
+    ) {
+        value.merge(nextValue(), uniquingKeysWith: { lhs, rhs in rhs })
+    }
+
 }

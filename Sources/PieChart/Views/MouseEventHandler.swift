@@ -10,13 +10,16 @@ struct MouseEventHandlerView: NSViewRepresentable {
         
         let mouseMoved: (NSEvent, NSView) -> Void
         let mouseExited: (NSEvent, NSView) -> Void
+        let didUpdateTrackingArea: () -> Void
     
         init(
             mouseMoved: @escaping (NSEvent, NSView) -> Void,
-            mouseExited: @escaping (NSEvent, NSView) -> Void
+            mouseExited: @escaping (NSEvent, NSView) -> Void,
+            didUpdateTrackingArea: @escaping () -> Void
         ) {
             self.mouseMoved = mouseMoved
             self.mouseExited = mouseExited
+            self.didUpdateTrackingArea = didUpdateTrackingArea
             super.init(frame: .zero)
         }
 
@@ -49,6 +52,7 @@ struct MouseEventHandlerView: NSViewRepresentable {
         }
 
         override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
             self.updateTrackingAreas()
         }
         
@@ -68,10 +72,8 @@ struct MouseEventHandlerView: NSViewRepresentable {
                 owner: self
             )
             self.addTrackingArea(trackingArea)
+            self.didUpdateTrackingArea()
             
-//            self.wantsLayer = true
-//            self.layer?.backgroundColor = CGColor.black
-
         }
 
     }
@@ -80,10 +82,15 @@ struct MouseEventHandlerView: NSViewRepresentable {
     let mouseMoved: (NSEvent, NSView) -> Void
     let mouseExited: (NSEvent, NSView) -> Void
 
+    /// Indicates the geometry of the view probably changed.
+    let didUpdateTrackingArea: () -> Void
+
     func makeNSView(context: Context) -> NSView {
         let view = MoustEventHandlerNSView(
             mouseMoved: self.mouseMoved,
-            mouseExited: self.mouseExited
+            mouseExited: self.mouseExited,
+            didUpdateTrackingArea: didUpdateTrackingArea
+            
         )
         self.viewAccessor(view)
         return view
@@ -100,13 +107,15 @@ extension View {
     func handleMouseEvents(
         viewAccessor: @escaping (MouseEventHandlerView.MoustEventHandlerNSView) -> Void,
         mouseMoved: @escaping (NSEvent, NSView) -> Void,
-        mouseExited: @escaping (NSEvent, NSView) -> Void
+        mouseExited: @escaping (NSEvent, NSView) -> Void,
+        didUpdateTrackingArea: @escaping () -> Void
     ) -> some View {
         
         let handler = MouseEventHandlerView(
             viewAccessor: viewAccessor,
             mouseMoved: mouseMoved,
-            mouseExited: mouseExited
+            mouseExited: mouseExited,
+            didUpdateTrackingArea: didUpdateTrackingArea
         )
 
         return self.background {
@@ -116,3 +125,28 @@ extension View {
 
 }
 
+
+func systemUptime() -> TimeInterval {
+    var currentTime = time_t()
+    var bootTime    = timeval()
+    var mib         = [CTL_KERN, KERN_BOOTTIME]
+    // NOTE: Use strideof(), NOT sizeof() to account for data structure
+    // alignment (padding)
+    // http://stackoverflow.com/a/27640066
+    // https://devforums.apple.com/message/1086617#1086617
+    var size = MemoryLayout<timeval>.stride
+    let result = sysctl(&mib, u_int(mib.count), &bootTime, &size, nil, 0)
+    if result != 0 {
+    #if DEBUG
+        print("ERROR - \(#file):\(#function) - errno = \(result)")
+    #endif
+        return 0
+    }
+    // Since we don't need anything more than second level accuracy, we use
+    // time() rather than say gettimeofday(), or something else. uptime
+    // command does the same
+    time(&currentTime)
+    let uptime = currentTime - bootTime.tv_sec
+    
+    return TimeInterval(uptime)
+}

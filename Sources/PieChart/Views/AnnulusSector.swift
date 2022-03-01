@@ -31,13 +31,25 @@ struct AnnulusSector: InsettableShape {
 
     var outerDiameterScale: CGFloat = 1
 
-    var animatableData: AnimatablePair<AnimatablePair<CGFloat, CGFloat>, AnimatablePair<CGFloat, AnimatablePair<CGFloat, CGFloat>>> {
+    var animatableData: AnimatablePair<
+        AnimatablePair<CGFloat, CGFloat>,
+        AnimatablePair<
+            CGFloat,
+            AnimatablePair<CGFloat, CGFloat>
+        >
+    > {
         get {
             AnimatablePair(
-                AnimatablePair(self.innerRadius, self.outerDiameterScale),
+                AnimatablePair(
+                    self.innerRadius,
+                    self.outerDiameterScale
+                ),
                 AnimatablePair(
                     self.startAngle.radians,
-                    AnimatablePair(self.delta.radians, self.inset)
+                    AnimatablePair(
+                        self.delta.radians,
+                        self.inset
+                    )
                 )
             )
         }
@@ -85,7 +97,7 @@ struct AnnulusSector: InsettableShape {
      - Parameter amount: The amount to scale the outer diameter by relative to
            the size of the frame.
      */
-    func scaleOuterDiameter(by amount: CGFloat) -> some Shape {
+    func scaleOuterDiameter(by amount: CGFloat) -> AnnulusSector {
         var copy = self
         // ensure this method can be applied multiple times with the expected
         // result

@@ -35,7 +35,7 @@ public class PieChartConfiguration: ObservableObject {
     @Published public var innerRadius: CGFloat
     
     var scaledInnerRadius: CGFloat {
-        self.innerRadius * self.scaleMultiplier
+        self.innerRadius * self.outerDiameterScale
     }
 
     /// The rotation of the entire pie chart.
@@ -51,8 +51,8 @@ public class PieChartConfiguration: ObservableObject {
     public private(set) var startAngles: [Angle] = []
     public private(set) var centralAngles: [Angle] = []
 
-    /// The amount by which to scale unhighlighted slices.
-    let scaleMultiplier: CGFloat = 0.95
+    /// The amount by which to scale the outer diameter of unhighlighted slices.
+    let outerDiameterScale: CGFloat = 0.95
     
     var mouseEventHandlerView: MouseEventHandlerView.MoustEventHandlerNSView? = nil
 
@@ -152,7 +152,9 @@ public class PieChartConfiguration: ObservableObject {
         // if the new value is the same as the old value.
         if self.highlightedSlice != highlightedSlice {
 //            print("change highlighted slice")
-            self.highlightedSlice = highlightedSlice
+//            DispatchQueue.main.async {
+                self.highlightedSlice = highlightedSlice
+//            }
         }
 
     }
@@ -165,6 +167,10 @@ public class PieChartConfiguration: ObservableObject {
         }
 //        print("current mouse location: \(location)")
         self.updateHighlightedSlice(mouseLocation: location)
+    }
+
+    func didUpdateTrackingArea() {
+        self.updateHighlighedSlice()
     }
 
     func debugStuff() {

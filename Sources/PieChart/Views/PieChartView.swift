@@ -50,7 +50,8 @@ public struct PieChartView<Center: View>: View {
                         self.configuration.mouseEventHandlerView = view
                     },
                     mouseMoved: configuration.mouseMoved(event:view:),
-                    mouseExited: configuration.mouseExited(event:view:)
+                    mouseExited: configuration.mouseExited(event:view:),
+                    didUpdateTrackingArea: configuration.didUpdateTrackingArea
                 )
             }
             
