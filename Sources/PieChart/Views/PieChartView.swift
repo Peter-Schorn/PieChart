@@ -1,12 +1,12 @@
 import SwiftUI
 
-struct PieChartView<Center: View>: View {
+public struct PieChartView<Center: View>: View {
 
     @ObservedObject var configuration: PieChartConfiguration
 
     let center: () -> Center
 
-    init(
+    public init(
         configuration: PieChartConfiguration,
         @ViewBuilder center: @escaping () -> Center
     ) {
@@ -15,7 +15,7 @@ struct PieChartView<Center: View>: View {
         self.center = center
     }
 
-    var body: some View {
+    public var body: some View {
         GeometryReader { geometry in
             ZStack {
                 center()
@@ -66,6 +66,17 @@ struct PieChartView<Center: View>: View {
         let frame = geometry.frame(in: .local)
         let minDimension = min(frame.width, frame.height)
         return minDimension * self.configuration.scaledInnerRadius
+    }
+
+}
+
+public extension PieChartView where Center == EmptyView {
+    
+    init(
+        configuration: PieChartConfiguration
+    ) {
+        self.configuration = configuration
+        self.center = EmptyView.init
     }
 
 }

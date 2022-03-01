@@ -24,10 +24,6 @@ let package = Package(
         .target(
             name: "PieChart",
             dependencies: []
-        ),
-        .testTarget(
-            name: "PieChartTests",
-            dependencies: ["PieChart"]
-        ),
+        )
     ]
 )

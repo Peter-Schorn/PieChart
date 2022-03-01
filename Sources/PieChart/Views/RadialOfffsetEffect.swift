@@ -4,6 +4,8 @@ import SwiftUI
 /**
  Offsets a view along a circle with a specified radius and angle.
 
+ Specifically designed in order to support animation of the offset
+ around this circle.
  */
 struct RadialOffsetEffect: GeometryEffect {
 

@@ -56,6 +56,8 @@ public class PieChartConfiguration: ObservableObject {
     
     var mouseEventHandlerView: MouseEventHandlerView.MoustEventHandlerNSView? = nil
 
+    var cancellables: Set<AnyCancellable> = []
+
     public init(
         highlightBehavior: HighlightBehavior? = nil,
         innerRadius: CGFloat = 0.5,
@@ -76,7 +78,7 @@ public class PieChartConfiguration: ObservableObject {
         self.rotation = rotation
         self.slices = slices
         self.slicesDidChange()
-
+        self.debugStuff()
     }
 
     func slicesDidChange() {
@@ -124,6 +126,20 @@ public class PieChartConfiguration: ObservableObject {
         
         var highlightedSlice: String? = nil
 
+        guard let nsView = self.mouseEventHandlerView else {
+            return
+        }
+
+        // "Point-in-rectangle functions generally assume that the bottom edge
+        // of a rectangle is outside of the rectangle boundaries"
+        let frame = nsView.frame.insetBy(dx: -2, dy: -2)
+        
+        guard nsView.isMousePoint(mouseLocation, in: frame) else {
+//            print("mouse outside frame")
+            return
+        }
+        
+
         for (id, path) in self.paths {
             if path.contains(mouseLocation) {
                 highlightedSlice = id
@@ -149,6 +165,15 @@ public class PieChartConfiguration: ObservableObject {
         }
 //        print("current mouse location: \(location)")
         self.updateHighlightedSlice(mouseLocation: location)
+    }
+
+    func debugStuff() {
+//        Timer.publish(every: 0.5, on: .main, in: .common)
+//            .autoconnect()
+//            .sink { date in
+//                print("------------------------------------------")
+//            }
+//            .store(in: &self.cancellables)
     }
 
 }

@@ -51,8 +51,14 @@ struct PieSliceView: View {
                     var paths = self.configuration.paths
                     paths[slice.id] = path
 
+                    // @Published publishes a change every time the setter is
+                    // called, even if the new value is the same as the old
+                    // value.
                     if paths != self.configuration.paths {
                         self.configuration.paths = paths
+                        
+                        // even if the mouse hasn't moved, the path may have,
+                        // which might change which path the mouse is inside of
                         self.configuration.updateHighlighedSlice()
                     }
 
@@ -70,9 +76,9 @@ struct PieSliceView: View {
             }
         }
         .onChange(of: configuration.highlightedSlice) { highlightedSlice in
-//            withAnimation(self.animation) {
+            withAnimation(self.animation) {
                 self.isHighlighted = highlightedSlice == self.slice.id
-//            }
+            }
         }
         
     }
@@ -117,39 +123,6 @@ struct PieSliceView: View {
             radius: middleRadius,
             angle: middleAngle
         )
-
-    }
-    
-    func sectorCenter(_ geometry: GeometryProxy) -> CGPoint {
-
-        let frame = geometry.frame(in: .local)
-            
-        // the frame is always square
-        var length = frame.width
-
-        if !isHighlighted {
-            length *= self.configuration.scaleMultiplier
-        }
-
-        let endAngle = self.startAngle + self.centralAngle
-        let middleAngle = (endAngle + self.startAngle) / 2
-        
-        let outerRadius = length / 2
-        
-        var innerRadius = outerRadius * self.configuration.scaledInnerRadius
-        
-        if !isHighlighted {
-            innerRadius /= self.configuration.scaleMultiplier
-        }
-        
-        let middleRadius = (innerRadius + outerRadius) / 2
-        
-        let point = CGPoint(
-            x: frame.midX + cos(middleAngle.radians) * middleRadius,
-            y: frame.midY + sin(middleAngle.radians) * middleRadius
-        )
-        
-        return point
 
     }
     
