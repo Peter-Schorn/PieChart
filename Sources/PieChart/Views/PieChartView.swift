@@ -24,10 +24,14 @@ public struct PieChartView<Center: View>: View {
                         maxHeight: innerDiameter(geometry)
                     )
                     .clipShape(Circle())
+                    .position(geometry.frame(in: .local).center)
                 
                 ForEach(configuration.slices.indices, id: \.self) { index in
+                    let slice = configuration.slices[index]
                     PieSliceView(
-                        index: index
+                        slice: slice,
+                        startAngle: configuration.startAngles[index],
+                        centralAngle: configuration.centralAngles[index]
                     )
                 }
                 
@@ -44,6 +48,7 @@ public struct PieChartView<Center: View>: View {
 //                    .stroke(.green.opacity(0.5), lineWidth: 2)
                 
             }
+            #if os(macOS)
             .if(configuration.highlightBehavior == .mouseHover) { view in
                 view.handleMouseEvents(
                     viewAccessor: { view in
@@ -54,6 +59,7 @@ public struct PieChartView<Center: View>: View {
                     didUpdateTrackingArea: configuration.didUpdateTrackingArea
                 )
             }
+            #endif
             
 
         }

@@ -5,7 +5,7 @@ import SwiftUI
  
  https://math.stackexchange.com/q/3028602/825630
  */
-struct AnnulusSector: InsettableShape {
+public struct AnnulusSector: InsettableShape {
     
     /// The start angle on a unit circle of the arcs that define this shape.
     var startAngle: Angle
@@ -31,7 +31,7 @@ struct AnnulusSector: InsettableShape {
 
     var outerDiameterScale: CGFloat = 1
 
-    var animatableData: AnimatablePair<
+    public var animatableData: AnimatablePair<
         AnimatablePair<CGFloat, CGFloat>,
         AnimatablePair<
             CGFloat,
@@ -62,7 +62,7 @@ struct AnnulusSector: InsettableShape {
         }
     }
 
-    init(
+    public init(
         startAngle: Angle,
         delta: Angle,
         innerRadius: CGFloat
@@ -72,13 +72,13 @@ struct AnnulusSector: InsettableShape {
         self.innerRadius = innerRadius
     }
 
-    func inset(by amount: CGFloat) -> Self {
+    public func inset(by amount: CGFloat) -> Self {
         var shape = self
         shape.inset += amount
         return shape
     }
 
-    func path(in rect: CGRect) -> Path {
+    public func path(in rect: CGRect) -> Path {
         let insetRect = rect.insetBy(dx: self.inset, dy: self.inset)
         let squareRect = insetRect.croppedToSquare()
         return self.pathInRectCore(squareRect)
@@ -97,7 +97,7 @@ struct AnnulusSector: InsettableShape {
      - Parameter amount: The amount to scale the outer diameter by relative to
            the size of the frame.
      */
-    func scaleOuterDiameter(by amount: CGFloat) -> AnnulusSector {
+    public func scaleOuterDiameter(by amount: CGFloat) -> AnnulusSector {
         var copy = self
         // ensure this method can be applied multiple times with the expected
         // result

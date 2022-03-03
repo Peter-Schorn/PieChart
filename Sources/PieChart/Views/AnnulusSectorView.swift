@@ -70,7 +70,7 @@ struct AnnulusSectorView: View, Animatable {
             }
             
         }
-        .fill(slice.fill)
+        .fill(slice.shapeFill)
         .if(configuration.highlightBehavior == .tap) { view in
             view.onTapGesture(perform: didTap)
         }

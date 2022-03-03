@@ -16,11 +16,14 @@ public class PieChartConfiguration: ObservableObject {
 
     public var slices: [PieSliceConfiguration] = [] {
         didSet {
+//            print("didSet PieChartConfiguration.slices")
             self.slicesDidChange()
         }
     }
 
-    @Published var highlightBehavior: HighlightBehavior
+    @Published public var animationPercent: CGFloat = 0
+
+    @Published public var highlightBehavior: HighlightBehavior
 
 
     /// The paths of all the pice slice shapes.
@@ -28,7 +31,7 @@ public class PieChartConfiguration: ObservableObject {
             [PieSliceConfiguration.ID: Path] = [:]
     
     /// The currently highlighted slice.
-    @Published public var highlightedSlice: String? = nil
+    @Published public var highlightedSlice: PieSliceConfiguration.ID? = nil
 
     /// The inner radius of the pie chart as a proportion of the size of the
     /// frame.
@@ -49,7 +52,10 @@ public class PieChartConfiguration: ObservableObject {
     public private(set) var totalAmount: CGFloat = 0
 
     public private(set) var startAngles: [Angle] = []
+//    public private(set) var middleAngles: [Angle] = []
     public private(set) var centralAngles: [Angle] = []
+
+    @Published public var debugOuterDiameterScale: CGFloat = 0.9
 
     /// The amount by which to scale the outer diameter of unhighlighted slices.
     let outerDiameterScale: CGFloat = 0.95
@@ -83,22 +89,35 @@ public class PieChartConfiguration: ObservableObject {
 
     func slicesDidChange() {
         self.totalAmount = slices.reduce(0, { $0 + $1.amount })
-        self.startAngles = []
-        self.centralAngles = []
-    
+        
+        var startAngles: [Angle] = []
+        var centralAngles: [Angle] = []
+
 //        var partialAngleSum = Angle.zero
         var partialAngleSum = self.rotation
 
         for slice in slices {
-            self.startAngles.append(partialAngleSum)
+            startAngles.append(partialAngleSum)
             let percent = slice.amount / totalAmount
             let centralAngle = Angle.radians(percent * 2 * Double.pi)
-            self.centralAngles.append(centralAngle)
+            centralAngles.append(centralAngle)
+//            let middleAngle = partialAngleSum + centralAngle / 2
+//            self.middleAngles.append(middleAngle)
             partialAngleSum += centralAngle
         }
-        self.updateHighlighedSlice()
+
+//        withAnimation {
+            self.startAngles = startAngles
+            self.centralAngles = centralAngles
+            self.updateHighlighedSlice()
+//        }
         self.objectWillChange.send()
+
     }
+    
+    // MARK: Mouse Hover
+    
+    #if os(macOS)
     
     func mouseExited(event: NSEvent, view: NSView) {
         guard self.highlightBehavior == .mouseHover else {
@@ -124,7 +143,7 @@ public class PieChartConfiguration: ObservableObject {
         mouseLocation: CGPoint
     ) {
         
-        var highlightedSlice: String? = nil
+        var highlightedSlice: PieSliceConfiguration.ID? = nil
 
         guard let nsView = self.mouseEventHandlerView else {
             return
@@ -134,18 +153,14 @@ public class PieChartConfiguration: ObservableObject {
         // of a rectangle is outside of the rectangle boundaries"
         let frame = nsView.frame.insetBy(dx: -2, dy: -2)
         
-        guard nsView.isMousePoint(mouseLocation, in: frame) else {
-//            print("mouse outside frame")
-            return
-        }
-        
-
-        for (id, path) in self.paths {
-            if path.contains(mouseLocation) {
-                highlightedSlice = id
-                break
+        if nsView.isMousePoint(mouseLocation, in: frame) {
+            for (id, path) in self.paths {
+                if path.contains(mouseLocation) {
+                    highlightedSlice = id
+                    break
+                }
+                
             }
-            
         }
 
         // @Published publishes a change every time the setter is called, even
@@ -161,6 +176,11 @@ public class PieChartConfiguration: ObservableObject {
 
     /// Based on the current mouse location.
     func updateHighlighedSlice() {
+        
+        guard self.highlightBehavior == .mouseHover else {
+            return
+        }
+
         guard let location = self.mouseEventHandlerView?.mouseLocation else {
 //            print("couldn't get current mouse location")
             return
@@ -173,6 +193,8 @@ public class PieChartConfiguration: ObservableObject {
         self.updateHighlighedSlice()
     }
 
+    #endif  // #if os(macOS)
+    
     func debugStuff() {
 //        Timer.publish(every: 0.5, on: .main, in: .common)
 //            .autoconnect()

@@ -13,29 +13,53 @@ struct PieSliceView: View {
 
     @State private var isHighlighted = false
 
+    // transition
+    @State private var animationPercent: CGFloat = 0
+
     let animation = Animation.easeInOut(duration: 0.2)
 
-    let index: Int
+    let slice: PieSliceConfiguration
+    let startAngle: Angle
+    let centralAngle: Angle
 
     init(
-        index: Int
+        slice: PieSliceConfiguration,
+        startAngle: Angle,
+        centralAngle: Angle
     ) {
-        self.index = index
-    }
-
-    var slice: PieSliceConfiguration {
-        self.configuration.slices[index]
-    }
-    
-    var startAngle: Angle {
-        self.configuration.startAngles[index]
-    }
-    var centralAngle: Angle {
-        self.configuration.centralAngles[index]
+        self.slice = slice
+        self.startAngle = startAngle
+        self.centralAngle = centralAngle
     }
 
     var outerDiameterScale: CGFloat {
         self.isHighlighted ? 1 : self.configuration.outerDiameterScale
+    }
+
+    // MARK: Reversed
+
+    var reversedStartAngle: Angle {
+        let result = self.startAngle + self.centralAngle
+//        print("start angle: \(result.degrees)")
+        return result
+    }
+    
+    var reversedCentralAngle: Angle {
+        -self.centralAngle
+    }
+    
+    // MARK: Animated
+
+    var animatedStartAngle: Angle {
+//        let startDelta = self.centralAngle / 2
+//
+//        return self.startAngle + startDelta - startDelta * self.animationPercent
+        return self.reversedStartAngle
+//        self.startAngle
+    }
+    
+    var animatedCentralAngle: Angle {
+        self.reversedCentralAngle * self.animationPercent
     }
 
     var body: some View {
@@ -43,8 +67,8 @@ struct PieSliceView: View {
         GeometryReader { geometry in
             ZStack {
                 AnnulusSector(
-                    startAngle: startAngle,
-                    delta: centralAngle,
+                    startAngle: animatedStartAngle,
+                    delta: animatedCentralAngle,
                     innerRadius: configuration.scaledInnerRadius
                 )
                 .scaleOuterDiameter(
@@ -55,23 +79,31 @@ struct PieSliceView: View {
                     var paths = self.configuration.paths
                     paths[slice.id] = path
 
-                    // @Published publishes a change every time the setter is
-                    // called, even if the new value is the same as the old
-                    // value.
+                    // @Published publishes a change every time the
+                    // setter is called, even if the new value is the
+                    // same as the old value.
                     if paths != self.configuration.paths {
-                        self.configuration.paths = paths
-
-                        // even if the mouse hasn't moved, the path may have,
-                        // which might change which path the mouse is inside of
-                        self.configuration.updateHighlighedSlice()
+                        DispatchQueue.main.async {
+                            self.configuration.paths = paths
+                            
+                            // even if the mouse hasn't moved, the path may
+                            // have, which might change which path the mouse
+                            // is inside of
+                            self.configuration.updateHighlighedSlice()
+                        }
                     }
 
                 }
-                .fill(slice.fill)
+                .fill(slice.shapeFill)
                 .if(configuration.highlightBehavior == .tap) { view in
                     view.onTapGesture(perform: didTap)
                 }
-
+                .onAppear {
+                    withAnimation(.linear(duration: 2)) {
+                        self.animationPercent = 1
+                    }
+                }
+            
                 slice.label
                     .modifier(radialOffset(geometry))
                 
@@ -82,7 +114,7 @@ struct PieSliceView: View {
                 self.isHighlighted = highlightedSlice == self.slice.id
             }
         }
-        
+        .id(slice.id)
     }
     
     func didTap() {
@@ -104,8 +136,8 @@ struct PieSliceView: View {
         // the frame is always square
         let length = frame.width * self.configuration.outerDiameterScale
 
-        let endAngle = self.startAngle + self.centralAngle
-        let middleAngle = (endAngle + self.startAngle) / 2
+        let endAngle = self.animatedStartAngle + self.animatedCentralAngle
+        let middleAngle = (endAngle + self.animatedStartAngle) / 2
         
         let outerRadius = length / 2
         
@@ -123,15 +155,43 @@ struct PieSliceView: View {
     
 }
 
-struct RadiusSectorPathPreferenceKey: PreferenceKey {
+struct PieSliceModifier: ViewModifier {
     
-    static let defaultValue: [PieSliceConfiguration.ID: Path] = [:]
+    let annulusSector: AnnulusSector
+    let fill: AnyShapeStyle
 
-    static func reduce(
-        value: inout [PieSliceConfiguration.ID: Path],
-        nextValue: () -> [PieSliceConfiguration.ID : Path]
-    ) {
-        value.merge(nextValue(), uniquingKeysWith: { lhs, rhs in rhs })
+    let percent: CGFloat
+    
+    func body(content: Content) -> some View {
+        let delta = self.annulusSector.delta * percent
+        AnnulusSector(
+            startAngle: self.annulusSector.startAngle,
+            delta: delta,
+            innerRadius: self.annulusSector.innerRadius
+        )
+        .fill(self.fill)
+    }
+
+}
+
+extension AnyTransition {
+    
+    static func pieSlice(
+        _ shape: AnnulusSector,
+        fill: AnyShapeStyle
+    ) -> Self {
+        Self.modifier(
+            active: PieSliceModifier(
+                annulusSector: shape,
+                fill: fill,
+                percent: 0
+            ),
+            identity: PieSliceModifier(
+                annulusSector: shape,
+                fill: fill,
+                percent: 1
+            )
+        )
     }
 
 }
