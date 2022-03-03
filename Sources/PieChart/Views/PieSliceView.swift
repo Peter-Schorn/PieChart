@@ -16,7 +16,16 @@ struct PieSliceView: View {
     // transition
     @State private var animationPercent: CGFloat = 0
 
-    let animation = Animation.easeInOut(duration: 0.2)
+//    var animationPercent: CGFloat {
+//        get {
+//            self.configuration.animationPercent
+//        }
+//        nonmutating set {
+//            self.configuration.animationPercent = newValue
+//        }
+//    }
+
+    let linearAnimation = Animation.linear(duration: 2)
 
     let slice: PieSliceConfiguration
     let startAngle: Angle
@@ -83,14 +92,14 @@ struct PieSliceView: View {
                     // setter is called, even if the new value is the
                     // same as the old value.
                     if paths != self.configuration.paths {
-                        DispatchQueue.main.async {
+//                        DispatchQueue.main.async {
                             self.configuration.paths = paths
                             
                             // even if the mouse hasn't moved, the path may
                             // have, which might change which path the mouse
                             // is inside of
                             self.configuration.updateHighlighedSlice()
-                        }
+//                        }
                     }
 
                 }
@@ -99,7 +108,7 @@ struct PieSliceView: View {
                     view.onTapGesture(perform: didTap)
                 }
                 .onAppear {
-                    withAnimation(.linear(duration: 2)) {
+                    withAnimation(self.linearAnimation) {
                         self.animationPercent = 1
                     }
                 }
@@ -110,10 +119,11 @@ struct PieSliceView: View {
             }
         }
         .onChange(of: configuration.highlightedSlice) { highlightedSlice in
-            withAnimation(self.animation) {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 self.isHighlighted = highlightedSlice == self.slice.id
             }
         }
+        .transition(.identity)
         .id(slice.id)
     }
     

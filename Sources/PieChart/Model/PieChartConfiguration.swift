@@ -20,6 +20,8 @@ public class PieChartConfiguration: ObservableObject {
             self.slicesDidChange()
         }
     }
+    
+    public let linearAnimation = Animation.linear(duration: 2)
 
     @Published public var animationPercent: CGFloat = 0
 
