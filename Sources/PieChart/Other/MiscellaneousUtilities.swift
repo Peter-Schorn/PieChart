@@ -90,6 +90,20 @@ extension NumberFormatter {
 
 }
 
+public extension CGRect {
+    
+    func absolutePoint(from unitPoint: UnitPoint) -> CGPoint {
+        let dx = self.width * unitPoint.x
+        let dy = self.height * unitPoint.y
+        return CGPoint(
+            x: self.minX + dx,
+            y: self.minY + dy
+        )
+    }
+
+}
+
+
 extension NSEvent.EventType: CustomStringConvertible {
     
     public var description: String {

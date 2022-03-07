@@ -80,7 +80,7 @@ struct MouseEventHandlerView: NSViewRepresentable {
 
     }
 
-    let viewAccessor: (MouseEventHandlerView.MoustEventHandlerNSView) -> Void
+    let nsViewAccessor: (MouseEventHandlerView.MoustEventHandlerNSView) -> Void
     let mouseMoved: (NSEvent, NSView) -> Void
     let mouseExited: (NSEvent, NSView) -> Void
 
@@ -94,7 +94,7 @@ struct MouseEventHandlerView: NSViewRepresentable {
             didUpdateTrackingArea: didUpdateTrackingArea
             
         )
-        self.viewAccessor(view)
+        self.nsViewAccessor(view)
         return view
     }
     
@@ -107,14 +107,14 @@ struct MouseEventHandlerView: NSViewRepresentable {
 extension View {
     
     func handleMouseEvents(
-        viewAccessor: @escaping (MouseEventHandlerView.MoustEventHandlerNSView) -> Void,
+        nsViewAccessor: @escaping (MouseEventHandlerView.MoustEventHandlerNSView) -> Void,
         mouseMoved: @escaping (NSEvent, NSView) -> Void,
         mouseExited: @escaping (NSEvent, NSView) -> Void,
         didUpdateTrackingArea: @escaping () -> Void
     ) -> some View {
         
         let handler = MouseEventHandlerView(
-            viewAccessor: viewAccessor,
+            nsViewAccessor: nsViewAccessor,
             mouseMoved: mouseMoved,
             mouseExited: mouseExited,
             didUpdateTrackingArea: didUpdateTrackingArea

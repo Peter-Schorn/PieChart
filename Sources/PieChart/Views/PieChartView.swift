@@ -26,15 +26,18 @@ public struct PieChartView<Center: View>: View {
                     .clipShape(Circle())
                     .position(geometry.frame(in: .local).center)
                 
-                ForEach(configuration.slices.indices, id: \.self) { index in
-                    let slice = configuration.slices[index]
-                    PieSliceView(
-                        slice: slice,
-                        startAngle: configuration.startAngles[index],
-                        centralAngle: configuration.centralAngles[index]
-                    )
+                ForEach(configuration.slices) { slice in
+                    if let index = configuration.slices.firstIndex(
+                        where: { $0.id == slice.id }
+                    ) {
+                        PieSliceView(
+                            slice: slice,
+                            startAngle: configuration.startAngles[index],
+                            centralAngle: configuration.centralAngles[index]
+                        )
+                    }
                 }
-                
+
 //                Rectangle()
 //                    .fill(.green.opacity(0.5))
 //                    .frame(width: 2, height: geometry.size.height)
@@ -51,7 +54,7 @@ public struct PieChartView<Center: View>: View {
             #if os(macOS)
             .if(configuration.highlightBehavior == .mouseHover) { view in
                 view.handleMouseEvents(
-                    viewAccessor: { view in
+                    nsViewAccessor: { view in
                         self.configuration.mouseEventHandlerView = view
                     },
                     mouseMoved: configuration.mouseMoved(event:view:),

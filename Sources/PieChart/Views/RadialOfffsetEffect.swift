@@ -32,6 +32,7 @@ struct RadialOffsetEffect: GeometryEffect {
     
 
     func effectValue(size: CGSize) -> ProjectionTransform {
+        
 //        print("effectValue")
         let offset = self.offset
         let transform = CGAffineTransform(

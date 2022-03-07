@@ -13,7 +13,7 @@ public struct AnnulusSector: InsettableShape {
     /**
      The central angle of the sector.
 
-     If positive, then the arc will be spanned clockwise from `startAngle`.
+     If positive, then the arc will be spanned clockwise fxrom `startAngle`.
      If negative, then the arc will be spanned counterclockwise from
      `startAngle`.
      */
@@ -176,13 +176,13 @@ struct AnnulusSector_Previews: PreviewProvider {
                 )
                 .fill(Color.red.opacity(0.5))
                 
-                AnnulusSector(
-                    startAngle: .degrees(-45),
-                    delta: .degrees(270),
-                    innerRadius: 0.5
-                )
-                .scaleOuterDiameter(by: scale)
-                .fill(Color.blue.opacity(0.5))
+//                AnnulusSector(
+//                    startAngle: .degrees(-45),
+//                    delta: .degrees(270),
+//                    innerRadius: 0.5
+//                )
+//                .scaleOuterDiameter(by: scale)
+//                .fill(Color.blue.opacity(0.5))
 
                 Rectangle()
                     .fill(Color.green.opacity(0.25))

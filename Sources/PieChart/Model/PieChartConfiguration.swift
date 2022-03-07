@@ -22,6 +22,7 @@ public class PieChartConfiguration: ObservableObject {
     }
     
     public let linearAnimation = Animation.linear(duration: 2)
+//    public let linearAnimation = Animation.linear(duration: 0.3)
 
     @Published public var animationPercent: CGFloat = 0
 
@@ -49,6 +50,9 @@ public class PieChartConfiguration: ObservableObject {
             self.slicesDidChange()
         }
     }
+
+    public let removeSliceSubject =
+            PassthroughSubject<PieSliceConfiguration.ID, Never>()
 
     /// The sum of the amount of all of the slices.
     public private(set) var totalAmount: CGFloat = 0
