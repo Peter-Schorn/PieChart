@@ -21,8 +21,8 @@ public class PieChartConfiguration: ObservableObject {
         }
     }
     
-    public let linearAnimation = Animation.linear(duration: 2)
-//    public let linearAnimation = Animation.linear(duration: 0.3)
+//    public let linearAnimation = Animation.linear(duration: 2)
+    public let linearAnimation = Animation.linear(duration: 0.3)
 
     @Published public var animationPercent: CGFloat = 0
 
@@ -45,7 +45,7 @@ public class PieChartConfiguration: ObservableObject {
     }
 
     /// The rotation of the entire pie chart.
-    @Published public var rotation: Angle {
+    public var rotation: Angle {
         didSet {
             self.slicesDidChange()
         }
@@ -93,8 +93,11 @@ public class PieChartConfiguration: ObservableObject {
         self.debugStuff()
     }
 
-    func slicesDidChange() {
-        self.totalAmount = slices.reduce(0, { $0 + $1.amount })
+    public func slicesDidChange() {
+        
+        print("slicesDidChange")
+
+        self.totalAmount = self.slices.reduce(0, { $0 + $1.amount })
         
         var startAngles: [Angle] = []
         var centralAngles: [Angle] = []
@@ -102,9 +105,17 @@ public class PieChartConfiguration: ObservableObject {
 //        var partialAngleSum = Angle.zero
         var partialAngleSum = self.rotation
 
-        for slice in slices {
+        for slice in self.slices {
             startAngles.append(partialAngleSum)
-            let percent = slice.amount / totalAmount
+            
+            let percent: CGFloat
+            if self.totalAmount == 0 {
+                percent = 0
+            }
+            else {
+                percent = slice.amount / self.totalAmount
+            }
+            
             let centralAngle = Angle.radians(percent * 2 * Double.pi)
             centralAngles.append(centralAngle)
 //            let middleAngle = partialAngleSum + centralAngle / 2
@@ -208,6 +219,12 @@ public class PieChartConfiguration: ObservableObject {
 //                print("------------------------------------------")
 //            }
 //            .store(in: &self.cancellables)
+        
+//        self.objectWillChange.sink {
+//            print("PieChartConfiguration.objectWillChange")
+//        }
+//        .store(in: &self.cancellables)
+
     }
 
 }

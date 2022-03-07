@@ -100,7 +100,15 @@ public extension CGRect {
             y: self.minY + dy
         )
     }
+    
+}
 
+public extension CGPoint {
+    
+    var isFinite: Bool {
+        self.x.isFinite && self.y.isFinite
+    }
+    
 }
 
 

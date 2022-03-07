@@ -65,3 +65,32 @@ public struct PieSliceConfiguration: Identifiable {
     }
 
 }
+
+//extension PieSliceConfiguration: Hashable {
+//
+//    public static func == (lhs: Self, rhs: Self) -> Bool {
+//        switch (lhs.fill, rhs.fill) {
+//            case (.color(let color), .color(let otherColor)):
+//                if color != otherColor {
+//                    return false
+//                }
+//            case (.color(_), .other(_)), (.other(_), .color(_)):
+//                return false
+//            case (.other(_), .other(_)):
+//                break
+//        }
+//        
+//        return lhs.id == rhs.id && lhs.title == rhs.title &&
+//                lhs.amount == rhs.amount
+//    }
+//    
+//    public func hash(into hasher: inout Hasher) {
+//        if case .color(let color) = self.fill {
+//            hasher.combine(color)
+//        }
+//        hasher.combine(self.id)
+//        hasher.combine(self.title)
+//        hasher.combine(self.amount)
+//    }
+//    
+//}

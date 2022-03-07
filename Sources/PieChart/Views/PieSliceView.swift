@@ -14,7 +14,7 @@ struct PieSliceView: View {
     @State private var isHighlighted = false
 
     // transition
-    @State private var animationPercent: CGFloat = 0
+    @State private var animationPercent: CGFloat = 1
 
 //    var animationPercent: CGFloat {
 //        get {
@@ -58,15 +58,16 @@ struct PieSliceView: View {
     // MARK: Animated
 
     var animatedStartAngle: Angle {
-//        let startDelta = self.centralAngle / 2
+        let startDelta = self.centralAngle / 2
 //
-//        return self.startAngle + startDelta - startDelta * self.animationPercent
-        return self.reversedStartAngle
-//        self.startAngle
+        return self.startAngle + startDelta - startDelta * self.animationPercent
+//        return self.reversedStartAngle
+//        return self.startAngle
     }
     
     var animatedCentralAngle: Angle {
-        self.reversedCentralAngle * self.animationPercent
+//        self.reversedCentralAngle * self.animationPercent
+        self.centralAngle * self.animationPercent
     }
     
     var body: some View {
@@ -81,24 +82,7 @@ struct PieSliceView: View {
                 .scaleOuterDiameter(
                     by: outerDiameterScale
                 )
-                .observePath { path in
-
-                    var paths = self.configuration.paths
-                    paths[slice.id] = path
-
-                    // @Published publishes a change every time the
-                    // setter is called, even if the new value is the
-                    // same as the old value.
-                    if paths != self.configuration.paths {
-                        self.configuration.paths = paths
-                        
-                        // even if the mouse hasn't moved, the path may
-                        // have, which might change which path the mouse
-                        // is inside of
-                        self.configuration.updateHighlighedSlice()
-                    }
-
-                }
+                .observePath(observePath(_:))
                 .fill(
                     slice.shapeFill
 //                        .in(shapeRect(geometry))
@@ -124,24 +108,48 @@ struct PieSliceView: View {
 //            outerDiameterScale: outerDiameterScale
 //        ))
         .transition(.identity)
+        .onAppear(perform: onAppear)
         .id(slice.id)
-        .onAppear {
-            print("onAppear \(self.animationPercent): \(slice.title)")
-            withAnimation(self.configuration.linearAnimation) {
-                self.animationPercent = 1
-            }
-//                    guard slice.title == "Fun" else {
-//                        return
-//                    }
-//                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-//                        withAnimation(self.configuration.linearAnimation) {
-//                            self.animationPercent = 0
-//                        }
-//                    }
-        }
         
     }
     
+    func onAppear() {
+        print("onAppear: \(slice.title); amount: \(slice.amount)")
+        guard let index = self.configuration.slices.firstIndex(
+            where: { $0.id == self.slice.id }
+        ) else {
+            return
+        }
+        DispatchQueue.main.async {
+            withAnimation(self.configuration.linearAnimation) {
+                self.configuration.slices[index].amount = 100
+            }
+        }
+    }
+    
+    func observePath(_ path: Path) {
+        
+        guard self.configuration.highlightBehavior == .mouseHover else {
+            return
+        }
+
+        var paths = self.configuration.paths
+        paths[slice.id] = path
+
+        // @Published publishes a change every time the
+        // setter is called, even if the new value is the
+        // same as the old value.
+        if paths != self.configuration.paths {
+            self.configuration.paths = paths
+            
+            // even if the mouse hasn't moved, the path may
+            // have, which might change which path the mouse
+            // is inside of
+            self.configuration.updateHighlighedSlice()
+        }
+
+    }
+
     func shapeRect(_ geometry: GeometryProxy) -> CGRect {
         if let path = self.configuration.paths[self.slice.id] {
             return path.boundingRect

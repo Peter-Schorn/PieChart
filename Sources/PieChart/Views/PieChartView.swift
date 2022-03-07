@@ -36,6 +36,9 @@ public struct PieChartView<Center: View>: View {
                             centralAngle: configuration.centralAngles[index]
                         )
                     }
+                    else {
+//                        let _ = print("slice \(slice.title) not in slices")
+                    }
                 }
 
 //                Rectangle()
