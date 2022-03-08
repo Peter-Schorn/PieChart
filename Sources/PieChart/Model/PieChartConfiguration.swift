@@ -16,8 +16,13 @@ public class PieChartConfiguration: ObservableObject {
 
     public var slices: [PieSliceConfiguration] = [] {
         didSet {
+//            if oldValue == self.slices {
+//                print("PieChartConfiguration.slices:didSet: didn't change")
+//            }
+//            else {
+                self.slicesDidChange()
+//            }
 //            print("didSet PieChartConfiguration.slices")
-            self.slicesDidChange()
         }
     }
     
@@ -95,9 +100,9 @@ public class PieChartConfiguration: ObservableObject {
 
     public func slicesDidChange() {
         
-        print("slicesDidChange")
+        
 
-        self.totalAmount = self.slices.reduce(0, { $0 + $1.amount })
+        let totalAmount = self.slices.reduce(0, { $0 + $1.amount })
         
         var startAngles: [Angle] = []
         var centralAngles: [Angle] = []
@@ -109,11 +114,11 @@ public class PieChartConfiguration: ObservableObject {
             startAngles.append(partialAngleSum)
             
             let percent: CGFloat
-            if self.totalAmount == 0 {
+            if totalAmount == 0 {
                 percent = 0
             }
             else {
-                percent = slice.amount / self.totalAmount
+                percent = slice.amount / totalAmount
             }
             
             let centralAngle = Angle.radians(percent * 2 * Double.pi)
@@ -123,12 +128,23 @@ public class PieChartConfiguration: ObservableObject {
             partialAngleSum += centralAngle
         }
 
-//        withAnimation {
+        
+        if self.totalAmount != totalAmount ||
+                self.startAngles != startAngles ||
+                self.centralAngles != centralAngles {
+            
+            self.totalAmount = totalAmount
             self.startAngles = startAngles
             self.centralAngles = centralAngles
             self.updateHighlighedSlice()
-//        }
-        self.objectWillChange.send()
+            
+            self.objectWillChange.send()
+            print("slicesDidChange")
+        }
+        else {
+            print("slicesDidChange: not sending objectWillChange")
+        }
+
 
     }
     

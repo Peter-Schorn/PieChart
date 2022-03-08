@@ -91,8 +91,10 @@ struct PieSliceView: View {
                     view.onTapGesture(perform: didTap)
                 }
             
-                slice.label
-                    .modifier(radialOffset(geometry))
+                if slice.amount != 0 {
+                    slice.label
+                        .modifier(radialOffset(geometry))
+                }
 
             }
         }
@@ -101,12 +103,6 @@ struct PieSliceView: View {
                 self.isHighlighted = highlightedSlice == self.slice.id
             }
         }
-//        .transition(.pieSliceScaleEffect(
-//            startAngle: animatedStartAngle,
-//            centralAngle: animatedCentralAngle,
-//            innerRadius: configuration.scaledInnerRadius,
-//            outerDiameterScale: outerDiameterScale
-//        ))
         .transition(.identity)
         .onAppear(perform: onAppear)
         .id(slice.id)
@@ -114,7 +110,7 @@ struct PieSliceView: View {
     }
     
     func onAppear() {
-        print("onAppear: \(slice.title); amount: \(slice.amount)")
+        print("PieSliceView onAppear: \(slice.title); amount: \(slice.amount)")
         guard let index = self.configuration.slices.firstIndex(
             where: { $0.id == self.slice.id }
         ) else {

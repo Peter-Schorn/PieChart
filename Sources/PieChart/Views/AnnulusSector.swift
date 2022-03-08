@@ -139,8 +139,8 @@ public struct AnnulusSector: InsettableShape {
         )
         
         let outerEndpoint = CGPoint(
-            x: rect.midX + cos(endAngle.radians) * scaledOuterRadius,
-            y: rect.midY + sin(endAngle.radians) * scaledOuterRadius
+            x: rect.midX + cos(endAngle.radians) * Double(scaledOuterRadius),
+            y: rect.midY + sin(endAngle.radians) * Double(scaledOuterRadius)
         )
         
         path.addLine(to: outerEndpoint)

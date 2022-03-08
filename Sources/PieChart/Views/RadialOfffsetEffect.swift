@@ -15,8 +15,8 @@ struct RadialOffsetEffect: GeometryEffect {
     
     var offset: CGVector {
         CGVector(
-            dx: cos(angle.radians) * radius,
-            dy: sin(angle.radians) * radius
+            dx: cos(angle.radians) * Double(radius),
+            dy: sin(angle.radians) * Double(radius)
         )
     }
 
